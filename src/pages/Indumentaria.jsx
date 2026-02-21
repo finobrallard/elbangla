@@ -23,9 +23,10 @@ function NumeroInput({ value, onChange, placeholder = '-', disabled }) {
 }
 
 export default function Indumentaria() {
-  const { jugadores, indumentaria, updateIndumentaria, getEstadoPago, estaHabilitado, addJugador, loading } = useApp()
+  const { jugadores, indumentaria, updateIndumentaria, getEstadoPago, estaHabilitado, addJugador, deleteAllJugadores, loading } = useApp()
   const { isAdmin } = useAuth()
   const [nuevoNombre, setNuevoNombre] = useState('')
+  const [confirmarEliminar, setConfirmarEliminar] = useState(false)
 
   const getIndumentaria = (jugadorId) => {
     return indumentaria.find((i) => i.jugador_id === jugadorId) || {}
@@ -39,6 +40,16 @@ export default function Indumentaria() {
     setNuevoNombre('')
   }
 
+  const handleEliminarTodos = async () => {
+    if (!confirmarEliminar) {
+      setConfirmarEliminar(true)
+      setTimeout(() => setConfirmarEliminar(false), 3000)
+      return
+    }
+    await deleteAllJugadores()
+    setConfirmarEliminar(false)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
@@ -50,26 +61,39 @@ export default function Indumentaria() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-slate-100">Gestión de Indumentaria</h2>
+        <h2 className="text-xl font-semibold text-slate-100">Jugadores</h2>
         <p className="text-slate-400 text-sm mt-1">Asigna números de camiseta por tipo</p>
       </div>
 
       {isAdmin && (
-      <form onSubmit={handleAddJugador} className="flex gap-2">
-        <input
-          type="text"
-          value={nuevoNombre}
-          onChange={(e) => setNuevoNombre(e.target.value)}
-          placeholder="Nombre del jugador"
-          className="flex-1 px-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-        />
+      <div className="flex flex-col sm:flex-row gap-2">
+        <form onSubmit={handleAddJugador} className="flex gap-2 flex-1">
+          <input
+            type="text"
+            value={nuevoNombre}
+            onChange={(e) => setNuevoNombre(e.target.value)}
+            placeholder="Nombre del jugador"
+            className="flex-1 px-4 py-2 rounded-lg bg-slate-700 border border-slate-600 text-slate-100 placeholder-slate-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+          />
+          <button
+            type="submit"
+            className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition"
+          >
+            Agregar
+          </button>
+        </form>
         <button
-          type="submit"
-          className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium transition"
+          type="button"
+          onClick={handleEliminarTodos}
+          className={`px-4 py-2 rounded-lg font-medium transition whitespace-nowrap ${
+            confirmarEliminar
+              ? 'bg-rose-600 hover:bg-rose-500 text-white'
+              : 'bg-slate-600 hover:bg-slate-500 text-slate-200'
+          }`}
         >
-          Agregar
+          {confirmarEliminar ? '¿Confirmar eliminar todos?' : 'Eliminar todos'}
         </button>
-      </form>
+      </div>
       )}
 
       <div className="rounded-xl border border-slate-700 bg-slate-800/50 overflow-hidden">

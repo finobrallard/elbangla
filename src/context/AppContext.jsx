@@ -57,14 +57,14 @@ export function AppProvider({ children }) {
         const storedIndumentaria = loadFromStorage(STORAGE_KEYS.indumentaria)
         const storedMovimientos = loadFromStorage(STORAGE_KEYS.movimientos)
 
-        setJugadores(storedJugadores?.length ? storedJugadores : defaultJugadores)
+        setJugadores(storedJugadores != null ? storedJugadores : defaultJugadores)
         setPagos(storedPagos || [])
         setIndumentaria(storedIndumentaria || [])
         setMovimientos(storedMovimientos || [])
       }
     } catch (err) {
       console.error('Error loading data:', err)
-      setJugadores(loadFromStorage(STORAGE_KEYS.jugadores) || defaultJugadores)
+      setJugadores(loadFromStorage(STORAGE_KEYS.jugadores) ?? defaultJugadores)
       setPagos(loadFromStorage(STORAGE_KEYS.pagos) || [])
       setIndumentaria(loadFromStorage(STORAGE_KEYS.indumentaria) || [])
       setMovimientos(loadFromStorage(STORAGE_KEYS.movimientos) || [])
@@ -165,6 +165,26 @@ export function AppProvider({ children }) {
     })
   }, [indumentaria])
 
+  const deleteAllJugadores = useCallback(async () => {
+    if (supabase) {
+      const { error } = await supabase.from('jugadores').delete().gte('created_at', '1970-01-01')
+      if (error) {
+        console.error('Error deleting jugadores:', error)
+        return
+      }
+      setJugadores([])
+      setPagos([])
+      setIndumentaria([])
+      return
+    }
+    setJugadores([])
+    setPagos([])
+    setIndumentaria([])
+    saveToStorage(STORAGE_KEYS.jugadores, [])
+    saveToStorage(STORAGE_KEYS.pagos, [])
+    saveToStorage(STORAGE_KEYS.indumentaria, [])
+  }, [])
+
   const addMovimiento = useCallback(async (tipo, concepto, monto, jugadorId = null) => {
     const nuevo = { tipo, concepto, monto, jugador_id: jugadorId || null }
     if (supabase) {
@@ -198,6 +218,7 @@ export function AppProvider({ children }) {
     estaHabilitado,
     updateIndumentaria,
     addMovimiento,
+    deleteAllJugadores,
     loadData,
     ingresos,
     egresos,
