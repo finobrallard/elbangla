@@ -8,11 +8,7 @@ const STORAGE_KEYS = {
   movimientos: 'bangla_movimientos',
 }
 
-const defaultJugadores = [
-  { id: '1', nombre: 'Juan Pérez' },
-  { id: '2', nombre: 'Carlos Rodríguez' },
-  { id: '3', nombre: 'Luis Martínez' },
-]
+const defaultJugadores = []
 
 const AppContext = createContext(null)
 
